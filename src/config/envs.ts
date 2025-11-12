@@ -17,4 +17,7 @@ export const envs = {
   dbName: process.env.DB_NAME,
   
   jwtSecret: jwtSecretFromEnv,
+
+  adminEmail: process.env.ADMIN_EMAIL,
+  adminPassword: process.env.ADMIN_PASSWORD,
 };
