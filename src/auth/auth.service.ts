@@ -6,6 +6,7 @@ import { User } from '../users/user.entity';
 import { RegisterUserDto } from './dtos/register-user.dto';
 import { LoginUserDto } from './dtos/login-user.dto';
 import { envs } from '../config/envs';
+import { AppError } from '../utils/AppError';
 
 export class AuthService {
   private readonly userRepository: Repository<User> = AppDataSource.getRepository(User);
@@ -15,7 +16,7 @@ export class AuthService {
 
     const userExists = await this.userRepository.findOneBy({ email });
     if (userExists) {
-      throw new Error('El correo electrónico ya está en uso.');
+      throw new AppError('El correo electrónico ya está en uso.', 400);
     }
 
     const user = this.userRepository.create(registerDto);    
@@ -35,12 +36,12 @@ export class AuthService {
 
     const user = await this.userRepository.findOneBy({ email });
     if (!user) {
-      throw new Error('Credenciales inválidas.'); // Email no encontrado
+      throw new AppError('Credenciales inválidas.', 401);
     }
 
     const isPasswordValid = bcrypt.compareSync(passwordDto, user.password);
     if (!isPasswordValid) {
-      throw new Error('Credenciales inválidas.');
+      throw new AppError('Credenciales inválidas.', 401);
     }
 
     const token = this.generateToken(user);

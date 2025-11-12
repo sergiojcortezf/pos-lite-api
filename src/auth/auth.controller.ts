@@ -21,15 +21,8 @@ export class AuthController {
       });
     }
 
-    try {
-      const result = await this.authService.register(registerDto);
-      return res.status(201).json(result); 
-    } catch (error) {
-      if (error instanceof Error) {
-        return res.status(400).json({ message: error.message });
-      }
-      return res.status(400).json({ message: 'Un error inesperado ocurrió durante el registro.' });
-    }
+    const result = await this.authService.register(registerDto);
+    return res.status(201).json(result);
   }
 
   public login = async (req: Request, res: Response) => {
@@ -45,15 +38,7 @@ export class AuthController {
       });
     }
 
-    try {
-      const result = await this.authService.login(loginDto);
-      return res.status(200).json(result);
-    } catch (error) {
-      if (error instanceof Error) {
-        // Ponemos 401 (Unauthorized) para errores de login
-        return res.status(401).json({ message: error.message });
-      }
-      return res.status(401).json({ message: 'Un error inesperado ocurrió durante el login.' });
-    }
+    const result = await this.authService.login(loginDto);
+    return res.status(200).json(result);
   }
 }

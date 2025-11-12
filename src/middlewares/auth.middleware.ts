@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { envs } from '../config/envs';
+import { AppError } from '../utils/AppError';
 
 interface JwtPayload {
   id: string;
@@ -20,21 +21,21 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   const authorization = req.headers.authorization;
 
   if (!authorization) {
-    return res.status(401).json({ message: 'No se proveyó un token.' });
+    return next(new AppError('No se proporcionó token de autenticación.', 401));
   }
 
   if (!authorization.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Token en formato inválido.' });
+    return next(new AppError('Token en formato inválido.', 401));
   }
 
   const token = authorization.split(' ')[1] || '';
 
   try {
     const decoded = jwt.verify(token, envs.jwtSecret) as JwtPayload;
-    req.user = decoded;
+    req.user = decoded;    
     next();
 
   } catch (error) {
-    return res.status(401).json({ message: 'Token no válido o expirado.' });
+    next(new AppError('Token no válido o expirado.', 401));
   }
 };

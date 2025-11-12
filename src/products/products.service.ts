@@ -6,6 +6,7 @@ import { UpdateProductDto } from './dtos/update-product.dto';
 
 import * as ExcelJS from 'exceljs';
 import { Readable } from 'stream';
+import { AppError } from '../utils/AppError';
 
 interface FindAllQuery {
   page?: number;
@@ -22,7 +23,7 @@ export class ProductsService {
       barcode: createDto.barcode 
     });
     if (barcodeExists) {
-      throw new Error('Ya existe un producto con ese código de barras.');
+      throw new AppError('Ya existe un producto con ese código de barras.', 400);
     }
 
     const product = this.productRepository.create(createDto);
@@ -60,7 +61,7 @@ export class ProductsService {
   public async findOne(id: string) {
     const product = await this.productRepository.findOneBy({ id });
     if (!product) {
-      throw new Error('Producto no encontrado.');
+      throw new AppError('Producto no encontrado.', 404);
     }
     return product;
   }
@@ -72,7 +73,7 @@ export class ProductsService {
     });
 
     if (!product) {
-      throw new Error('Producto no encontrado.');
+      throw new AppError('Producto no encontrado.', 404);
     }
 
     await this.productRepository.save(product);
@@ -95,7 +96,7 @@ export class ProductsService {
 
     const worksheet = workbook.worksheets[0];
     if (!worksheet) {
-      throw new Error('No se encontró ninguna hoja de trabajo en el archivo.');
+      throw new AppError('No se encontró ninguna hoja de trabajo en el archivo.', 400);
     }
 
     let created = 0;
@@ -113,7 +114,7 @@ export class ProductsService {
         const stock = Number(row.getCell(4).value);
 
         if (!barcode || !name || isNaN(price) || isNaN(stock)) {
-          throw new Error(`Datos inválidos o incompletos en la fila ${i}`);
+          throw new AppError(`Datos inválidos o incompletos en la fila ${i}`, 400);
         }
 
         let product = await this.productRepository.findOneBy({ barcode });

@@ -19,98 +19,55 @@ export class ProductsController {
       });
     }
 
-    try {
-      const product = await this.productsService.create(createDto);
-      return res.status(201).json(product);
-    } catch (error) {
-      if (error instanceof Error) {
-        return res.status(400).json({ message: error.message });
-      }
-      return res.status(500).json({ message: 'Error interno del servidor.' });
-    }
+    const product = await this.productsService.create(createDto);
+    return res.status(201).json(product);
   }
 
   public findAll = async (req: Request, res: Response) => {
-    try {
-      const query = req.query; 
-      const result = await this.productsService.findAll(query);
-      return res.status(200).json(result);
-    } catch (error) {
-      if (error instanceof Error) {
-        return res.status(500).json({ message: error.message });
-      }
-      return res.status(500).json({ message: 'Error interno del servidor.' });
-    }
+    const query = req.query; 
+    const result = await this.productsService.findAll(query);
+    return res.status(200).json(result);
   }
 
   public findOne = async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const product = await this.productsService.findOne(id);
-      return res.status(200).json(product);
-    } catch (error) {
-      if (error instanceof Error) {
-        return res.status(404).json({ message: error.message });
-      }
-      return res.status(500).json({ message: 'Error interno del servidor.' });
-    }
+    const { id } = req.params;
+    const product = await this.productsService.findOne(id);
+    return res.status(200).json(product);
   }
 
   public update = async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const updateDto = plainToInstance(UpdateProductDto, req.body);
-      const errors = await validate(updateDto);
-      if (errors.length > 0) {
-        return res.status(400).json({ 
-          message: 'Error en la validación.', 
-          errors: errors.map(e => e.constraints) 
-        });
-      }
+    const { id } = req.params;
+    const updateDto = plainToInstance(UpdateProductDto, req.body);
 
-      const product = await this.productsService.update(id, updateDto);
-      return res.status(200).json(product);
-    } catch (error) {
-      if (error instanceof Error) {
-        return res.status(404).json({ message: error.message });
-      }
-      return res.status(500).json({ message: 'Error interno del servidor.' });
+    const errors = await validate(updateDto);
+    if (errors.length > 0) {
+      return res.status(400).json({ 
+        message: 'Error en la validación.', 
+        errors: errors.map(e => e.constraints) 
+      });
     }
+
+    const product = await this.productsService.update(id, updateDto);
+    return res.status(200).json(product);
   }
 
   public delete = async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const result = await this.productsService.delete(id);
-      return res.status(200).json(result);
-    } catch (error) {
-      if (error instanceof Error) {
-        return res.status(404).json({ message: error.message });
-      }
-      return res.status(500).json({ message: 'Error interno del servidor.' });
-    }
+    const { id } = req.params;
+    const result = await this.productsService.delete(id);
+    return res.status(200).json(result);
   }
 
   public uploadCatalog = async (req: Request, res: Response) => {
-    try {
-      const file = req.file;
+    const file = req.file;
 
-      if (!file) {
-        throw new Error('No se recibió ningún archivo .xlsx');
-      }
-
-      const result = await this.productsService.uploadCatalog(file.buffer);
-
-      return res.status(200).json({
-        message: 'Catálogo procesado exitosamente.',
-        summary: result
-      });
-
-    } catch (error) {
-      if (error instanceof Error) {
-        return res.status(400).json({ message: error.message });
-      }
-      return res.status(500).json({ message: 'Error interno del servidor.' });
+    if (!file) {
+      throw new Error('No se recibió ningún archivo .xlsx');
     }
+
+    const result = await this.productsService.uploadCatalog(file.buffer);
+    return res.status(200).json({
+      message: 'Catálogo procesado exitosamente.',
+      summary: result
+    });
   }
 }

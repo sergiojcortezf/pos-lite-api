@@ -8,6 +8,8 @@ import authRoutes from './auth/auth.routes';
 import userRoutes from './users/users.routes';
 import productRoutes from './products/products.routes';
 
+import { globalErrorHandler } from './middlewares/error.middleware';
+
 export class App {
   private app: Application;
 
@@ -35,6 +37,8 @@ export class App {
     this.app.use('/api/auth', authRoutes);
     this.app.use('/api', userRoutes);
     this.app.use('/api/products', productRoutes);
+
+    this.app.use(globalErrorHandler);
   }
 
   private async connectDb(): Promise<void> {

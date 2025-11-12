@@ -1,3 +1,4 @@
+import 'express-async-errors';
 import { App } from './app';
 import { envs } from './config/envs';
 

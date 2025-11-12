@@ -2,6 +2,7 @@ import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/data-source';
 import { User } from './user.entity';
 import { UpdateProfileDto } from './dtos/update-profile.dto';
+import { AppError } from '../utils/AppError';
 
 export class UsersService {
   private readonly userRepository: Repository<User> = AppDataSource.getRepository(User);
@@ -10,7 +11,7 @@ export class UsersService {
     const user = await this.userRepository.findOneBy({ id: userId });
 
     if (!user) {
-      throw new Error('Usuario no encontrado.');
+      throw new AppError('Usuario no encontrado.', 404);
     }
 
     const { password, ...userWithoutPassword } = user;
@@ -21,7 +22,7 @@ export class UsersService {
     const user = await this.userRepository.findOneBy({ id: userId });
 
     if (!user) {
-      throw new Error('Usuario no encontrado.');
+      throw new AppError('Usuario no encontrado.', 404);
     }
 
     Object.assign(user, updateDto);
