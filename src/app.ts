@@ -3,6 +3,7 @@ import { AppDataSource } from './config/data-source';
 
 import authRoutes from './auth/auth.routes';
 import userRoutes from './users/users.routes';
+import productRoutes from './products/products.routes';
 
 export class App {
   private app: Application;
@@ -28,6 +29,7 @@ export class App {
 
     this.app.use('/api/auth', authRoutes);
     this.app.use('/api', userRoutes);
+    this.app.use('/api/products', productRoutes);
   }
 
   private async connectDb(): Promise<void> {
