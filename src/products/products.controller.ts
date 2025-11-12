@@ -1,23 +1,13 @@
 import { Request, Response } from 'express';
-import { validate } from 'class-validator';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { UpdateProductDto } from './dtos/update-product.dto';
-import { plainToInstance } from 'class-transformer';
 
 export class ProductsController {
   private productsService = new ProductsService();
 
   public create = async (req: Request, res: Response) => {
-    const createDto = plainToInstance(CreateProductDto, req.body);
-
-    const errors = await validate(createDto);
-    if (errors.length > 0) {
-      return res.status(400).json({ 
-        message: 'Error en la validación.', 
-        errors: errors.map(e => e.constraints) 
-      });
-    }
+    const createDto = req.body as CreateProductDto;
 
     const product = await this.productsService.create(createDto);
     return res.status(201).json(product);
@@ -37,15 +27,8 @@ export class ProductsController {
 
   public update = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const updateDto = plainToInstance(UpdateProductDto, req.body);
 
-    const errors = await validate(updateDto);
-    if (errors.length > 0) {
-      return res.status(400).json({ 
-        message: 'Error en la validación.', 
-        errors: errors.map(e => e.constraints) 
-      });
-    }
+    const updateDto = req.body as UpdateProductDto;
 
     const product = await this.productsService.update(id, updateDto);
     return res.status(200).json(product);
