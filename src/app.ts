@@ -1,6 +1,9 @@
 import express, { Application, Request, Response } from 'express';
 import { AppDataSource } from './config/data-source';
 
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger.config';
+
 import authRoutes from './auth/auth.routes';
 import userRoutes from './users/users.routes';
 import productRoutes from './products/products.routes';
@@ -26,6 +29,8 @@ export class App {
     this.app.get('/', (req: Request, res: Response) => {
       res.status(200).send('API POS-Lite está corriendo!');
     });
+
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
     this.app.use('/api/auth', authRoutes);
     this.app.use('/api', userRoutes);
