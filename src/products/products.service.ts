@@ -1,4 +1,4 @@
-import { Repository, Like, FindOptionsWhere } from 'typeorm';
+import { Repository, Like, ILike, FindOptionsWhere } from 'typeorm';
 import { AppDataSource } from '../config/data-source';
 import { Product } from './product.entity';
 import { CreateProductDto } from './dtos/create-product.dto';
@@ -41,7 +41,7 @@ export class ProductsService {
       where.category = query.category;
     }
     if (query.search) {
-      where.name = Like(`%${query.search}%`);
+      where.name = ILike(`%${query.search}%`);
     }
 
     const [products, total] = await this.productRepository.findAndCount({

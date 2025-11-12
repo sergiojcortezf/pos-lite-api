@@ -21,7 +21,6 @@ export const swaggerSpec: swaggerUi.JsonObject = {
       description: 'Servidor de Producción (Render)',
     },
   ],
-  // 1. Definición de Seguridad (JWT)
   components: {
     securitySchemes: {
       bearerAuth: {
@@ -31,39 +30,56 @@ export const swaggerSpec: swaggerUi.JsonObject = {
         description: 'Ingresa el token JWT (ey...)'
       },
     },
-    // 2. Definición de Schemas (DTOs)
     schemas: {
-      // --- AÑADIMOS EJEMPLOS Y REGLAS (minLength) ---
       CreateProductDto: {
         type: 'object',
         required: ['name', 'price', 'stock', 'barcode'],
         properties: {
-          name: { type: 'string', example: 'Gansito' },
-          price: { type: 'number', format: 'float', example: 25.50 },
-          stock: { type: 'integer', example: 100 },
-          barcode: { type: 'string', minLength: 8, example: '7501000100018' },
-          category: { type: 'string', example: 'Pastelitos' },
+          name: { type: 'string', minLength: 3, maxLength: 255, example: 'Gansito' },
+          price: { type: 'number', format: 'float', minimum: 0, maximum: 9999, example: 25.50 },
+          stock: { type: 'integer', minimum: 0, maximum: 1000, example: 100 },
+          barcode: { type: 'string', minLength: 8, maxLength: 50, example: '7501000100018' },
+          category: { type: 'string', minLength: 3, maxLength: 100, example: 'Pastelitos' },
         },
       },
       UpdateProductDto: {
         type: 'object',
         properties: {
-          name: { type: 'string', example: 'Gansito Marinela' },
-          price: { type: 'number', format: 'float', example: 26.00 },
-          stock: { type: 'integer', example: 150 },
-          barcode: { type: 'string', minLength: 8, example: '7501000100018' },
-          category: { type: 'string', example: 'Postres' },
+          name: { type: 'string', minLength: 3, maxLength: 255, example: 'Gansito Marinela' },
+          price: { type: 'number', format: 'float', minimum: 0, maximum: 9999, example: 26.00 },
+          stock: { type: 'integer', minimum: 0, maximum: 1000, example: 150 },
+          barcode: { type: 'string', minLength: 8, maxLength: 50, example: '7501000100018' },
+          category: { type: 'string', minLength: 3, maxLength: 100, example: 'Postres' },
+        },
+      },
+      RegisterUserDto: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', minLength: 2, maxLength: 30, example: 'Sergio Cajero' },
+          email: { type: 'string', format: 'email', maxLength: 40, example: 'cajero@test.com' },
+          password: { type: 'string', minLength: 6, maxLength: 100, example: 'password123' },
+        },
+      },
+      LoginUserDto: {
+        type: 'object',
+        properties: {
+          email: { type: 'string', format: 'email', maxLength: 40, example: 'cajero@test.com' },
+          password: { type: 'string', minLength: 6, maxLength: 20, example: 'password123' },
+        },
+      },
+      UpdateProfileDto: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', minLength: 2, maxLength: 30, example: 'Sergio Cortez F.' },
         },
       },
     },
   },
-  // 3. Definición de Tags (Categorías)
   tags: [
     { name: 'Auth', description: 'Autenticación y registro' },
     { name: 'Profile', description: 'Gestión del perfil del usuario' },
     { name: 'Products', description: 'Gestión de productos' },
   ],
-  // 4. Definición de Paths (Endpoints)
   paths: {
     // --- AUTH ---
     '/auth/register': {
