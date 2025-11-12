@@ -5,6 +5,8 @@ import { envs } from './envs';
 import { User } from '../users/user.entity';
 import { Product } from '../products/product.entity';
 
+const isProduction = process.env.RENDER === 'true';
+
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -15,14 +17,11 @@ export const AppDataSource = new DataSource({
   database: envs.dbName,
 
   // Configuración para Render
-  ssl: true, 
-  extra: {
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  },
-
-  synchronize: true,
+  ssl: !isProduction, 
+  extra: isProduction 
+    ? {} 
+    : { ssl: { rejectUnauthorized: false } },
+  synchronize: !isProduction,
   logging: false,
 
   entities: [User, Product],
