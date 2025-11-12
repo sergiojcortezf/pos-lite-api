@@ -1,6 +1,8 @@
 import express, { Application, Request, Response } from 'express';
 import { AppDataSource } from './config/data-source';
 
+import authRoutes from './auth/auth.routes';
+
 export class App {
   private app: Application;
 
@@ -23,6 +25,7 @@ export class App {
       res.status(200).send('API POS-Lite está corriendo!');
     });
 
+    this.app.use('/api/auth', authRoutes);
   }
 
   private async connectDb(): Promise<void> {
