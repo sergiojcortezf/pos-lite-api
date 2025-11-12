@@ -89,3 +89,19 @@ Desarrollar la API RESTful (backend) que sirva como el motor central para un sis
   - No se implementará un Frontend (UI).
   - No se implementarán los endpoints de "Ventas" (el acto de "cobrar" o registrar una transacción POS), solo la gestión del inventario.
 - El sistema de roles (`ADMIN` vs `CASHIER`) se mencionará, pero la implementación del middleware de roles es opcional si el tiempo no lo permite (el middleware de autenticación es obligatorio).
+
+## 7. Resultado Final (Despliegue)
+
+La API fue completada y desplegada exitosamente, cumpliendo con todos los criterios de éxito definidos en la sección 5.
+
+La aplicación está en vivo y disponible en la siguiente URL:
+
+- **URL Pública de la API:** `https://pos-lite-api.onrender.com`
+- **Documentación Swagger (UI):** **`https://pos-lite-api.onrender.com/api-docs`**
+
+### Credenciales de Prueba
+
+Se ha creado un usuario de prueba en la base de datos de producción para facilitar la evaluación:
+
+- **Usuario:** `sergio.test.prod@correo.com`
+- **Password:** `password123`
