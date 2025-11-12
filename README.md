@@ -1,8 +1,8 @@
 # API POS-Lite (Prueba Técnica)
 
-API RESTful desarrollada en Node.js y TypeScript como solución a la prueba técnica de "Backend Developer". El proyecto implementa un sistema de autenticación JWT y un CRUD completo para la gestión de productos, incluyendo la carga masiva de catálogos mediante archivos Excel.
+API RESTful desarrollada en Node.js y TypeScript como solución a la prueba técnica de "Backend Developer". El proyecto implementa un sistema de autenticación JWT, un CRUD completo para productos (con carga masiva desde Excel) y un sistema de Control de Acceso Basado en Roles (RBAC).
 
-La API está desplegada, documentada con Swagger y probada con Jest.
+La arquitectura sigue los principios SOLID (como el Principio de Responsabilidad Única) y DRY, utilizando un manejador de errores global y middlewares de validación. La API está desplegada, documentada con Swagger y probada con Jest (cubriendo caminos felices e infelices).
 
 ---
 
@@ -13,14 +13,25 @@ Puedes probar la API en vivo ahora mismo:
 - **URL Base:** `https://pos-lite-api.onrender.com`
 - **Documentación Swagger (UI):** **`https://pos-lite-api.onrender.com/api-docs`**
 
-### Credenciales de Prueba
+---
 
-Para probar los endpoints protegidos, primero regístrate o usa las siguientes credenciales de prueba en el endpoint `POST /api/auth/login`:
+## 🔑 Credenciales de Prueba
 
-- **Usuario:** `sergio.test.prod@correo.com`
+La API tiene dos roles: `ADMIN` (puede hacer todo) y `CASHIER` (solo puede leer).
+
+### Usuario Administrador (ADMIN)
+
+Este usuario se crea mediante el script de "seed" y tiene todos los permisos (crear, actualizar, borrar, cargar catálogos).
+
+- **Usuario:** `admin@poslite.com` (o el que hayas puesto en tu `.env`)
+- **Password:** `supersecretpassword123` (o el que hayas puesto en tu `.env`)
+
+### Usuario Cajero (CASHIER)
+
+Cualquier usuario nuevo registrado a través de la API `POST /api/auth/register` recibirá automáticamente el rol `CASHIER`. Este usuario solo puede _leer_ datos (ej. `GET /products`), pero recibirá un error `403 Forbidden` si intenta crear o borrar.
+
+- **Usuario de ejemplo:** `cajero@test.com`
 - **Password:** `password123`
-
-_(Puedes usar el botón "Authorize" en la UI de Swagger para pegar el token que obtengas)._
 
 ---
 
@@ -31,8 +42,8 @@ _(Puedes usar el botón "Authorize" en la UI de Swagger para pegar el token que 
 - **Base de Datos:** PostgreSQL
 - **ORM:** TypeORM
 - **Autenticación:** JWT (JSON Web Tokens)
-- **Validación:** `class-validator`, `class-transformer`
-- **Manejo de Archivos:** `multer` (para la subida), `exceljs` (para leer .xlsx)
+- **Validación:** `class-validator`, `class-transformer` (usados en un middleware genérico)
+- **Manejo de Archivos:** `multer`, `exceljs`
 - **Pruebas:** Jest
 - **Contenedores:** Docker
 - **Documentación:** Swagger (con `swagger-ui-express`)
@@ -46,7 +57,7 @@ _(Puedes usar el botón "Authorize" en la UI de Swagger para pegar el token que 
 
 - Node.js (v18 o superior)
 - npm
-- Una base de datos PostgreSQL corriendo (localmente o en la nube)
+- Una base de datos PostgreSQL corriendo
 
 ### 2. Pasos de Instalación
 
@@ -64,7 +75,7 @@ _(Puedes usar el botón "Authorize" en la UI de Swagger para pegar el token que 
     ```
 
 3.  **Configurar Variables de Entorno:**
-    Crea un archivo `.env` en la raíz del proyecto y copia el contenido de `.env.example` (o usa este). **Debes llenar estos valores con tu propia base de datos y un secreto JWT.**
+    Crea un archivo `.env` en la raíz y llénalo con tus valores. (Usa `.env.example` como plantilla). **Debes** incluir las credenciales para tu base de datos y el `ADMIN`.
 
     ```env
     # APP
@@ -74,41 +85,38 @@ _(Puedes usar el botón "Authorize" en la UI de Swagger para pegar el token que 
     DB_HOST=localhost
     DB_PORT=5432
     DB_USERNAME=postgres
-    DB_PASSWORD=tu_password_de_postgres
+    DB_PASSWORD=tu_password
     DB_NAME=pos_lite_db
 
     # JWT
-    JWT_SECRET=un_secreto_muy_largo_y_dificil_de_adivinar
+    JWT_SECRET=un_secreto_muy_largo_y_dificil
+
+    # ADMIN SEED
+    ADMIN_EMAIL=admin@poslite.com
+    ADMIN_PASSWORD=supersecretpassword123
+    ```
+
+4.  **Correr el "Seed" (Sembrado) de la BBDD:**
+    Este comando creará tu usuario `ADMIN` en la base de datos. **Ejecútalo una sola vez.**
+
+    ```bash
+    npm run seed
+    ```
+
+5.  **Iniciar el servidor:**
+    ```bash
+    npm run dev
     ```
 
 ---
 
 ## ⚙️ Comandos Disponibles
 
-- **Correr en modo desarrollo (con hot-reload):**
-
-  ```bash
-  npm run dev
-  ```
-
-  (La API estará disponible en `http://localhost:3000`)
-
-- **Correr pruebas unitarias:**
-
-  ```bash
-  npm test
-  ```
-
-- **Compilar para producción:**
-
-  ```bash
-  npm run build
-  ```
-
-- **Correr en modo producción:**
-  ```bash
-  npm run start
-  ```
+- `npm run dev`: Inicia el servidor en modo desarrollo (con hot-reload).
+- `npm run seed`: Ejecuta el script de sembrado para crear el usuario ADMIN.
+- `npm test`: Corre todas las pruebas unitarias con Jest.
+- `npm run build`: Compila el proyecto de TypeScript a JavaScript (`dist/`).
+- `npm run start`: Inicia el servidor en modo producción (desde `dist/`).
 
 ---
 

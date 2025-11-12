@@ -90,18 +90,62 @@ Desarrollar la API RESTful (backend) que sirva como el motor central para un sis
   - No se implementarán los endpoints de "Ventas" (el acto de "cobrar" o registrar una transacción POS), solo la gestión del inventario.
 - El sistema de roles (`ADMIN` vs `CASHIER`) se mencionará, pero la implementación del middleware de roles es opcional si el tiempo no lo permite (el middleware de autenticación es obligatorio).
 
-## 7. Resultado Final (Despliegue)
+---
 
-La API fue completada y desplegada exitosamente, cumpliendo con todos los criterios de éxito definidos en la sección 5.
+## 7. Mejoras de Arquitectura y Refactorización
 
-La aplicación está en vivo y disponible en la siguiente URL:
+Además de cumplir con los requisitos básicos, se implementaron varias mejoras de arquitectura para asegurar la calidad, mantenibilidad y escalabilidad del código, siguiendo los principios **SOLID** y **DRY**.
+
+### 1. Manejo de Errores Centralizado (DRY)
+
+- **Problema:** La lógica `try...catch` estaba duplicada en todos los métodos de los controladores.
+- **Solución:** Se implementó un **Middleware de Manejo de Errores Global** (`globalErrorHandler`) y una clase `AppError` personalizada.
+- **Resultado:** Los controladores ahora están limpios de `try...catch`. Los servicios lanzan errores (`throw new AppError('...', 404)`) y el middleware global los atrapa y formatea la respuesta HTTP correcta (400, 401, 403, 404, 500) de forma consistente.
+
+### 2. Middleware de Validación de DTOs (DRY y SRP)
+
+- **Problema:** La lógica de validación (`await validate(dto)`) estaba duplicada en los controladores.
+- **Solución:** Se creó un **Middleware de Validación** genérico (`validationMiddleware`).
+- **Resultado:** Las rutas (ej. `products.routes.ts`) ahora declaran qué DTO usan, y el controlador recibe un `req.body` ya validado y transformado. Esto limpia los controladores y respeta el Principio de Responsabilidad Única.
+
+### 3. Control de Acceso Basado en Roles (RBAC) Profesional
+
+- **Problema:** La API necesitaba diferenciar entre `ADMIN` (permiso total) y `CASHIER` (solo lectura).
+- **Solución:** En lugar de un atajo (ej. "el primer usuario es admin"), se implementó una solución profesional:
+  1.  **Script de "Seed" (`seed.ts`):** Un comando `npm run seed` separado que crea el usuario `ADMIN` inicial basándose en variables de entorno seguras (`ADMIN_EMAIL`).
+  2.  **Middleware `checkRole`:** Un "guardia" que verifica si el usuario autenticado tiene el rol requerido (ej. `['ADMIN']`).
+- **Resultado:** La ruta de registro `POST /register` está limpia y solo crea `CASHIERs`. Las rutas sensibles (como `DELETE /products`) están protegidas y solo responden al `ADMIN`.
+
+### 4. Cobertura de Pruebas Robusta
+
+- **Problema:** Las pruebas iniciales solo cubrían el "camino feliz".
+- **Solución:** Se expandieron las pruebas unitarias (Jest) para todos los servicios para incluir los **"caminos infelices"**.
+- **Resultado:** Ahora hay pruebas que verifican explícitamente que el sistema falla como se espera (ej. login con contraseña incorrecta, creación de producto con barcode duplicado, búsqueda de usuario inexistente).
+
+## 8. Resultado Final (Despliegue y Pruebas)
+
+La API fue completada, refactorizada y desplegada exitosamente, cumpliendo con todos los criterios de éxito y mejoras de arquitectura.
+
+La aplicación está en vivo y disponible para pruebas:
 
 - **URL Pública de la API:** `https://pos-lite-api.onrender.com`
 - **Documentación Swagger (UI):** **`https://pos-lite-api.onrender.com/api-docs`**
 
 ### Credenciales de Prueba
 
-Se ha creado un usuario de prueba en la base de datos de producción para facilitar la evaluación:
+Se ha implementado un sistema de Roles (RBAC) con dos niveles de acceso. Se recomienda probar ambos para verificar la seguridad de los endpoints:
 
-- **Usuario:** `sergio.test.prod@correo.com`
+#### 1. Usuario Administrador (ADMIN)
+
+Este usuario fue creado usando el script de "seed" (`npm run seed`) y tiene acceso completo a todos los endpoints (incluyendo `POST /products`, `DELETE /products`, etc.).
+
+- **Usuario:** `admin@poslite.com` (o el definido en `ADMIN_EMAIL`)
+- **Password:** `supersecretpassword123` (o el definido en `ADMIN_PASSWORD`)
+
+#### 2. Usuario Cajero (CASHIER)
+
+Este usuario se puede crear a través del endpoint público `POST /api/auth/register`. De acuerdo a la lógica de negocio, recibirá automáticamente el rol `CASHIER`.
+
+- **Prueba de Acceso:** Este usuario _puede_ leer datos (`GET /products`) pero recibirá un error `403 Forbidden` si intenta crear o borrar productos, demostrando que el `checkRole.middleware.ts` funciona.
+- **Usuario de ejemplo:** `cajero@test.com`
 - **Password:** `password123`
