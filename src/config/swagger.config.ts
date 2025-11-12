@@ -16,6 +16,10 @@ export const swaggerSpec: swaggerUi.JsonObject = {
       url: 'http://localhost:3000/api',
       description: 'Servidor Local',
     },
+    {
+      url: 'https://pos-lite-api.onrender.com/api',
+      description: 'Servidor de Producción (Render)',
+    },
   ],
   // 1. Definición de Seguridad (JWT)
   components: {
