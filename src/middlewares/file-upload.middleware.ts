@@ -1,5 +1,6 @@
 import { Request } from 'express';
 import multer, { FileFilterCallback } from 'multer';
+import { AppError } from '../utils/AppError';
 
 const excelFileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
   const allowedMimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -7,7 +8,7 @@ const excelFileFilter = (req: Request, file: Express.Multer.File, cb: FileFilter
   if (file.mimetype === allowedMimeType) {
     cb(null, true); 
   } else {
-    cb(new Error('Formato de archivo inválido. Solo se acepta .xlsx')); 
+      cb(new AppError('Formato de archivo inválido. Solo se acepta .xlsx', 400)); 
   }
 };
 

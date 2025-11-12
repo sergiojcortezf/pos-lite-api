@@ -13,6 +13,9 @@ Puedes probar la API en vivo ahora mismo:
 - **URL Base:** `https://pos-lite-api.onrender.com`
 - **Documentación Swagger (UI):** **`https://pos-lite-api.onrender.com/api-docs`**
 
+**Nota sobre el archivo de prueba:**
+Para probar el endpoint `POST /products/upload-catalog`, puedes usar el archivo de ejemplo incluido en el repositorio en la ruta: `/test_files/catalogo.xlsx`.
+
 ---
 
 ## 🔑 Credenciales de Prueba
@@ -135,3 +138,11 @@ El proyecto incluye un `Dockerfile` optimizado (multi-etapa) para producción.
     ```bash
     docker run -p 3000:3000 --env-file .env pos-lite-api
     ```
+
+---
+
+## 💡 Mejoras Futuras y Casos Límite Identificados
+
+Si bien la API es completamente funcional y cumple con los requisitos, durante las pruebas de casos límite se identificó una mejora de arquitectura clave:
+
+- **Validación de Carga Masiva:** Actualmente, el endpoint `POST /products/upload-catalog` usa una validación de servicio simple. Una mejora futura sería refactorizar este endpoint para que valide cada fila del Excel contra el `CreateProductDto` usando `class-validator`. Esto centralizaría todas las reglas de negocio (ej. `@MaxLength`, `@Max`) y manejaría automáticamente casos como "stock flotante" o "barcodes demasiado cortos".

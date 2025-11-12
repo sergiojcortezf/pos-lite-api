@@ -9,6 +9,6 @@ export class LoginUserDto {
 
   @IsString({ message: 'La contraseña debe ser un texto.' })
   @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres.' })
-  @MaxLength(20, { message: 'La contraseña no puede exceder los 20 caracteres.' })
+  @MaxLength(100, { message: 'La contraseña no puede exceder los 100 caracteres.' })
   password!: string;
 }

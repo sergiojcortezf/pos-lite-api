@@ -64,7 +64,7 @@ export const swaggerSpec: swaggerUi.JsonObject = {
         type: 'object',
         properties: {
           email: { type: 'string', format: 'email', maxLength: 40, example: 'cajero@test.com' },
-          password: { type: 'string', minLength: 6, maxLength: 20, example: 'password123' },
+          password: { type: 'string', minLength: 6, maxLength: 100, example: 'password123' },
         },
       },
       UpdateProfileDto: {
