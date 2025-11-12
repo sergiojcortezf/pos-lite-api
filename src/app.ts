@@ -2,6 +2,7 @@ import express, { Application, Request, Response } from 'express';
 import { AppDataSource } from './config/data-source';
 
 import authRoutes from './auth/auth.routes';
+import userRoutes from './users/users.routes';
 
 export class App {
   private app: Application;
@@ -26,6 +27,7 @@ export class App {
     });
 
     this.app.use('/api/auth', authRoutes);
+    this.app.use('/api', userRoutes);
   }
 
   private async connectDb(): Promise<void> {

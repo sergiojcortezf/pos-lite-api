@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from 'typeorm';
 import { IsEmail, MinLength } from 'class-validator';
 import * as bcrypt from 'bcryptjs';
 
-@Entity({ name: 'users' }) // Esto creará la tabla 'users'
+@Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -20,18 +20,14 @@ export class User {
   password!: string;
 
   @Column({ 
-    type: 'simple-array', // 'simple-array' es un tipo de TypeORM
-    default: 'CASHIER' // Por defecto, todos son 'CASHIER'
+    type: 'simple-array',
+    default: 'CASHIER'
   })
   roles!: string[];
 
-  // Esto es un "hook" de TypeORM
-  // Se ejecuta automáticamente ANTES de guardar un usuario nuevo
   @BeforeInsert() 
   hashPassword() {
-    // Generamos el "salt"
     const salt = bcrypt.genSaltSync(10);
-    // Hasheamos la contraseña
     this.password = bcrypt.hashSync(this.password, salt);
   }
 }
