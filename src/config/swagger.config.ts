@@ -33,25 +33,26 @@ export const swaggerSpec: swaggerUi.JsonObject = {
     },
     // 2. Definición de Schemas (DTOs)
     schemas: {
+      // --- AÑADIMOS EJEMPLOS Y REGLAS (minLength) ---
       CreateProductDto: {
         type: 'object',
         required: ['name', 'price', 'stock', 'barcode'],
         properties: {
-          name: { type: 'string' },
-          price: { type: 'number', format: 'float' },
-          stock: { type: 'integer' },
-          barcode: { type: 'string' },
-          category: { type: 'string' },
+          name: { type: 'string', example: 'Gansito' },
+          price: { type: 'number', format: 'float', example: 25.50 },
+          stock: { type: 'integer', example: 100 },
+          barcode: { type: 'string', minLength: 8, example: '7501000100018' },
+          category: { type: 'string', example: 'Pastelitos' },
         },
       },
       UpdateProductDto: {
         type: 'object',
         properties: {
-          name: { type: 'string' },
-          price: { type: 'number', format: 'float' },
-          stock: { type: 'integer' },
-          barcode: { type: 'string' },
-          category: { type: 'string' },
+          name: { type: 'string', example: 'Gansito Marinela' },
+          price: { type: 'number', format: 'float', example: 26.00 },
+          stock: { type: 'integer', example: 150 },
+          barcode: { type: 'string', minLength: 8, example: '7501000100018' },
+          category: { type: 'string', example: 'Postres' },
         },
       },
     },
@@ -68,15 +69,15 @@ export const swaggerSpec: swaggerUi.JsonObject = {
     '/auth/register': {
       post: {
         tags: ['Auth'],
-        summary: 'Registra un nuevo usuario',
-        security: [], // Endpoint público
+        summary: 'Registra un nuevo usuario (rol: CASHIER)',
+        security: [],
         requestBody: {
           required: true,
-          content: { 'application/json': { schema: { type: 'object', properties: { name: { type: 'string' }, email: { type: 'string' }, password: { type: 'string' } } } } },
+          content: { 'application/json': { schema: { type: 'object', properties: { name: { type: 'string', example: 'Sergio Cajero' }, email: { type: 'string', example: 'cajero@test.com' }, password: { type: 'string', example: 'password123' } } } } },
         },
         responses: {
           '201': { description: 'Usuario creado' },
-          '400': { description: 'Error de validación' },
+          '400': { description: 'Error de validación o email ya en uso' },
         },
       },
     },
@@ -84,10 +85,10 @@ export const swaggerSpec: swaggerUi.JsonObject = {
       post: {
         tags: ['Auth'],
         summary: 'Inicia sesión y obtiene un token JWT',
-        security: [], // Endpoint público
+        security: [],
         requestBody: {
           required: true,
-          content: { 'application/json': { schema: { type: 'object', properties: { email: { type: 'string' }, password: { type: 'string' } } } } },
+          content: { 'application/json': { schema: { type: 'object', properties: { email: { type: 'string', example: 'cajero@test.com' }, password: { type: 'string', example: 'password123' } } } } },
         },
         responses: {
           '200': { description: 'Login exitoso' },
@@ -100,23 +101,26 @@ export const swaggerSpec: swaggerUi.JsonObject = {
       get: {
         tags: ['Profile'],
         summary: 'Obtiene el perfil del usuario autenticado',
-        security: [{ bearerAuth: [] }], // Endpoint protegido
+        security: [{ bearerAuth: [] }],
         responses: {
           '200': { description: 'Perfil del usuario' },
-          '401': { description: 'No autorizado' },
+          '401': { description: 'No autorizado (token inválido o no provisto)' },
+          '404': { description: 'Usuario no encontrado' },
         },
       },
       put: {
         tags: ['Profile'],
         summary: 'Actualiza el perfil del usuario autenticado',
-        security: [{ bearerAuth: [] }], // Endpoint protegido
+        security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
-          content: { 'application/json': { schema: { type: 'object', properties: { name: { type: 'string' } } } } },
+          content: { 'application/json': { schema: { type: 'object', properties: { name: { type: 'string', example: 'Sergio Cortez F.' } } } } },
         },
         responses: {
           '200': { description: 'Perfil actualizado' },
+          '400': { description: 'Error de validación (ej. nombre muy corto)' },
           '401': { description: 'No autorizado' },
+          '404': { description: 'Usuario no encontrado' },
         },
       },
     },
@@ -124,7 +128,7 @@ export const swaggerSpec: swaggerUi.JsonObject = {
     '/products': {
       get: {
         tags: ['Products'],
-        summary: 'Lista todos los productos (con filtros)',
+        summary: 'Lista todos los productos (permiso: TODOS)',
         security: [{ bearerAuth: [] }],
         parameters: [
           { in: 'query', name: 'page', schema: { type: 'integer' } },
@@ -132,11 +136,14 @@ export const swaggerSpec: swaggerUi.JsonObject = {
           { in: 'query', name: 'search', schema: { type: 'string' } },
           { in: 'query', name: 'category', schema: { type: 'string' } },
         ],
-        responses: { '200': { description: 'Lista de productos' } },
+        responses: { 
+          '200': { description: 'Lista de productos' },
+          '401': { description: 'No autorizado' },
+        },
       },
       post: {
         tags: ['Products'],
-        summary: 'Crea un nuevo producto',
+        summary: 'Crea un nuevo producto (permiso: ADMIN)',
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
@@ -144,14 +151,16 @@ export const swaggerSpec: swaggerUi.JsonObject = {
         },
         responses: {
           '201': { description: 'Producto creado' },
-          '400': { description: 'Error de validación' },
+          '400': { description: 'Error de validación (ej. barcode duplicado o < 8 caracteres)' },
+          '401': { description: 'No autorizado' },
+          '403': { description: 'Acceso denegado (no eres ADMIN)' },
         },
       },
     },
     '/products/upload-catalog': {
       post: {
         tags: ['Products'],
-        summary: 'Carga un catálogo de productos .xlsx',
+        summary: 'Carga un catálogo de productos .xlsx (permiso: ADMIN)',
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
@@ -159,35 +168,54 @@ export const swaggerSpec: swaggerUi.JsonObject = {
         },
         responses: {
           '200': { description: 'Resumen de la carga' },
-          '400': { description: 'Archivo no válido' },
+          '400': { description: 'Archivo no válido (solo .xlsx) o datos incorrectos' },
+          '401': { description: 'No autorizado' },
+          '403': { description: 'Acceso denegado (no eres ADMIN)' },
         },
       },
     },
     '/products/{id}': {
       get: {
         tags: ['Products'],
-        summary: 'Obtiene un producto por ID',
+        summary: 'Obtiene un producto por ID (permiso: TODOS)',
         security: [{ bearerAuth: [] }],
         parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
-        responses: { '200': { description: 'Detalles del producto' }, '404': { description: 'Producto no encontrado' } },
+        responses: { 
+          '200': { description: 'Detalles del producto' },
+          '400': { description: 'ID con formato inválido' },
+          '401': { description: 'No autorizado' },
+          '404': { description: 'Producto no encontrado' },
+        },
       },
       put: {
         tags: ['Products'],
-        summary: 'Actualiza un producto por ID',
+        summary: 'Actualiza un producto por ID (permiso: ADMIN)',
         security: [{ bearerAuth: [] }],
         parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
         requestBody: {
           required: true,
           content: { 'application/json': { schema: { $ref: '#/components/schemas/UpdateProductDto' } } },
         },
-        responses: { '200': { description: 'Producto actualizado' }, '404': { description: 'Producto no encontrado' } },
+        responses: { 
+          '200': { description: 'Producto actualizado' },
+          '400': { description: 'ID con formato inválido o error de validación' },
+          '401': { description: 'No autorizado' },
+          '403': { description: 'Acceso denegado (no eres ADMIN)' },
+          '404': { description: 'Producto no encontrado' },
+        },
       },
       delete: {
         tags: ['Products'],
-        summary: 'Elimina un producto por ID',
+        summary: 'Elimina un producto por ID (permiso: ADMIN)',
         security: [{ bearerAuth: [] }],
         parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
-        responses: { '200': { description: 'Producto eliminado' }, '404': { description: 'Producto no encontrado' } },
+        responses: { 
+          '200': { description: 'Producto eliminado' },
+          '400': { description: 'ID con formato inválido' },
+          '401': { description: 'No autorizado' },
+          '403': { description: 'Acceso denegado (no eres ADMIN)' },
+          '404': { description: 'Producto no encontrado' },
+        },
       },
     },
   },
